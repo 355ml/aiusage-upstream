@@ -138,6 +138,7 @@ export interface OverviewComparisonPayload {
   totalTokens: number;
   cacheHitRate: number;
   userMessageCount?: number;
+  userMessageChars?: number;
 }
 
 export interface InteractionMetricItem {

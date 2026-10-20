@@ -527,10 +527,11 @@ async function loadComparison(filters: DashboardFilters, env: Env): Promise<Over
     }>(),
     env.DB.prepare(`
       SELECT
-        COALESCE(SUM(CASE WHEN a.kind = 'user_message' THEN a.event_count ELSE 0 END), 0) AS user_message_count
+        COALESCE(SUM(CASE WHEN a.kind = 'user_message' THEN a.event_count ELSE 0 END), 0) AS user_message_count,
+        COALESCE(SUM(CASE WHEN a.kind = 'user_message_chars' THEN a.event_count ELSE 0 END), 0) AS user_message_chars
       FROM daily_activity_breakdown a
       ${activityWhere.whereClause}
-    `).bind(...activityWhere.params).first<{ user_message_count: number }>().catch((error) => {
+    `).bind(...activityWhere.params).first<{ user_message_count: number; user_message_chars: number }>().catch((error) => {
       if (String(error).includes('daily_activity_breakdown')) return null;
       throw error;
     }),
@@ -560,6 +561,7 @@ async function loadComparison(filters: DashboardFilters, env: Env): Promise<Over
     totalTokens,
     cacheHitRate: cacheDenominator > 0 ? (cachedInputTokens / cacheDenominator) * 100 : 0,
     userMessageCount: activity ? Number(activity.user_message_count ?? 0) : undefined,
+    userMessageChars: activity ? Number(activity.user_message_chars ?? 0) : undefined,
   };
 }
 

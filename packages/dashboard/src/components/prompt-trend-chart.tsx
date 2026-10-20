@@ -84,7 +84,8 @@ export function PromptTrendChart({
               className="fill-slate-400 dark:fill-slate-500" fontSize={11}
             />
             <YAxis yAxisId="messages" orientation="left" width={48} {...messageAxis} {...axisProps} />
-            <YAxis yAxisId="chars" orientation="right" width={1} mirror {...charAxis} {...axisProps} />
+            {/* Mirrored axis keeps the plot width; give its labels room for Chinese units. */}
+            <YAxis yAxisId="chars" orientation="right" width={1} mirror tick={{ width: 80 }} {...charAxis} {...axisProps} />
             <ChartTooltip
               cursor={{ stroke: isDark ? '#334155' : '#e2e8f0' }}
               content={({ active, label, payload }: TooltipProps<number, string>) => (

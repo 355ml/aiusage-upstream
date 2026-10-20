@@ -469,7 +469,9 @@ export function App() {
       outputTokens: formatDeltaPercent(kpis?.outputTokens, comparison.outputTokens + comparison.reasoningOutputTokens),
       cachedTokens: formatDeltaPercent(kpis?.cachedTokens, comparison.cachedInputTokens),
       activeDays: formatDeltaPercent(overview.activeDays, comparison.activeDays),
-      totalEvents: formatDeltaPercent(overview.totalEvents, comparison.totalEvents),
+      userMessageChars: typeof overview.interactionMetrics?.userMessageChars === 'number'
+        ? formatDeltaPercent(overview.interactionMetrics.userMessageChars, comparison.userMessageChars)
+        : undefined,
       userMessages: formatDeltaPercent(userMessageCount, comparison.userMessageCount),
       avgDailyCost: formatDeltaPercent(overview.averageDailyCostUsd, comparison.averageDailyCostUsd),
       cacheHitRate: formatDeltaPercent(kpis?.cacheHitRate, comparison.cacheHitRate),
@@ -632,9 +634,11 @@ export function App() {
             </div>
             <div className="card">
               <KpiCard
-                label={t.totalEvents}
-                value={formatNumber(overview?.totalEvents ?? 0)}
-                delta={kpiDeltas.totalEvents}
+                label={t.userMessageChars}
+                value={typeof overview?.interactionMetrics?.userMessageChars === 'number'
+                  ? formatCompact(overview.interactionMetrics.userMessageChars, locale)
+                  : t.unavailable}
+                delta={kpiDeltas.userMessageChars}
               />
             </div>
             <div className="card">
