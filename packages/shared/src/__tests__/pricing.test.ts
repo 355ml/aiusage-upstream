@@ -452,3 +452,37 @@ describe('阶梯定价', () => {
     expect(r.matchedTierIndex).toBe(1);
   });
 });
+
+// Sources verified 2026-10-20: OpenAI GPT-6.1 Sol model card and Anthropic pricing.
+describe('October 2026 pricing gaps', () => {
+  it('GPT-6.1 Sol includes its 5% cache-read and cache-write rates', () => {
+    const r = calculateCost('openai', 'codex', 'gpt-6.1-sol', {
+      inputTokens: 50_000, cachedInputTokens: 100_000, cacheWriteTokens: 10_000, outputTokens: 100_000,
+    });
+    expect(r.costStatus).toBe('exact');
+    expect(r.estimatedCostUsd).toBeCloseTo(1.135, 4);
+    expect(r.matchedTierIndex).toBe(0);
+  });
+  it('GPT-6.1 Sol charges the full request above 272K input tokens', () => {
+    const r = calculateCost('openai', 'codex', 'gpt-6.1-sol', {
+      inputTokens: 200_000, cachedInputTokens: 100_000, cacheWriteTokens: 10_000, outputTokens: 100_000,
+    });
+    expect(r.estimatedCostUsd).toBeCloseTo(2.37, 4);
+    expect(r.matchedTierIndex).toBe(1);
+  });
+  it.each([['fast', 2], ['priority', 2], ['ultrafast', 6]])('GPT-6.1 Sol %s has an explicit multiplier', (tier, multiplier) => {
+    const r = calculateCost('openai', 'codex', `gpt-6.1-sol-${tier}`, {
+      inputTokens: 100_000, cachedInputTokens: 100_000, cacheWriteTokens: 0, outputTokens: 100_000,
+    });
+    expect(r.estimatedCostUsd).toBeCloseTo(1.21 * Number(multiplier), 4);
+  });
+  it('Sonnet 5.5 distinguishes cache reads and both cache-write lifetimes', () => {
+    const r = calculateCost('anthropic', 'claude-code', 'claude-sonnet-5-5', {
+      inputTokens: 1_000_000, cachedInputTokens: 1_000_000,
+      cacheWriteTokens: 2_000_000, cacheWrite5mTokens: 1_000_000, cacheWrite1hTokens: 1_000_000,
+      outputTokens: 1_000_000,
+    });
+    expect(r.costStatus).toBe('exact');
+    expect(r.estimatedCostUsd).toBeCloseTo(18.6, 4);
+  });
+});
